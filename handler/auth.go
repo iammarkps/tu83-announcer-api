@@ -35,11 +35,12 @@ func (handler *Handler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	sess, _ := session.Get("SESSION", c)
+	sess, _ := session.Get("Session", c)
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
+		SameSite: 2,
 	}
 
 	sess.Values["user"] = User.ID

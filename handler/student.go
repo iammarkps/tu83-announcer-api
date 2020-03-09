@@ -11,7 +11,7 @@ import (
 
 // Student handler
 func (handler *Handler) Student(c echo.Context) error {
-	sess, _ := session.Get("SESSION", c)
+	sess, _ := session.Get("Session", c)
 	User := &models.User{}
 
 	ID := fmt.Sprintf("%v", sess.Values["user"])
