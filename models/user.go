@@ -10,4 +10,5 @@ type User struct {
 	ExamType  string
 	Status    bool
 	Rank      uint16
+	Confirmed bool
 }

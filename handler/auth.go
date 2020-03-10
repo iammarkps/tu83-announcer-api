@@ -56,7 +56,7 @@ func (handler *Handler) Login(c echo.Context) error {
 
 // Logout handler
 func (handler *Handler) Logout(c echo.Context) error {
-	sess, _ := session.Get("SESSION", c)
+	sess, _ := session.Get("Session", c)
 	sess.Options.MaxAge = -1
 
 	err := sess.Save(c.Request(), c.Response())

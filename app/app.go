@@ -56,6 +56,7 @@ func New() (*echo.Echo, *gorm.DB) {
 	})
 
 	e.GET("/student", h.Student)
+	e.POST("/confirm", h.Confirm)
 	e.POST("/login", h.Login)
 	e.GET("/logout", h.Logout)
 
