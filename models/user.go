@@ -4,11 +4,13 @@ package models
 type User struct {
 	ID        string
 	CtzID     string
+	Phone     string
+	Prefix    string
 	FirstName string
 	LastName  string
 	Plan      string
 	ExamType  string
-	Status    bool
-	Rank      uint16
+	Status    string
+	Rank      string
 	Confirmed bool
 }

@@ -17,8 +17,8 @@ func (handler *Handler) Login(c echo.Context) error {
 	}
 
 	type userReq struct {
-		ID    string `json:"id"`
 		CtzID string `json:"ctz_id"`
+		Phone string `json:"phone"`
 	}
 
 	u := new(userReq)
@@ -29,9 +29,9 @@ func (handler *Handler) Login(c echo.Context) error {
 
 	User := &models.User{}
 
-	handler.DB.Where(&models.User{ID: u.ID}).First(User)
+	handler.DB.Where(&models.User{CtzID: u.CtzID}).First(User)
 
-	if !(User.CtzID == u.CtzID) || User == (&models.User{}) {
+	if !(User.Phone == u.Phone) || User == (&models.User{}) {
 		return c.JSON(http.StatusUnauthorized, "Unauthorized")
 	}
 
@@ -39,8 +39,9 @@ func (handler *Handler) Login(c echo.Context) error {
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   86400 * 7,
-		HttpOnly: true,
 		SameSite: 2,
+		Secure:   true,
+		HttpOnly: true,
 	}
 
 	sess.Values["user"] = User.ID

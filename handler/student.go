@@ -17,5 +17,9 @@ func (handler *Handler) Student(c echo.Context) error {
 	ID := fmt.Sprintf("%v", sess.Values["user"])
 	handler.DB.Where(&models.User{ID: ID}).First(User)
 
+	if User == (&models.User{}) {
+		return c.JSON(http.StatusUnauthorized, "Unauthorized")
+	}
+
 	return c.JSON(http.StatusOK, User)
 }

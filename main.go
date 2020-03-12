@@ -15,7 +15,7 @@ func main() {
 	e, db := app.New()
 
 	go func() {
-		if err := e.Start(":1323"); err != nil {
+		if err := e.StartTLS(":1323", "cert.pem", "key.pem"); err != nil {
 			e.Logger.Info(err)
 			e.Logger.Fatal("Shutting down HTTP server 🔥🔥🔥")
 		}

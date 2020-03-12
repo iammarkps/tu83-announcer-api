@@ -2,9 +2,15 @@ package app
 
 import (
 	"encoding/gob"
+	"log"
+	"os"
 	"time"
 
+	// Redis
+	_ "github.com/gomodule/redigo/redis"
+	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
+	"gopkg.in/boj/redistore.v1"
 
 	// SQL Dialect
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -14,7 +20,6 @@ import (
 
 	"net/http"
 
-	"github.com/gorilla/sessions"
 	"github.com/iammarkps/tu83-announcer-api/handler"
 	"github.com/iammarkps/tu83-announcer-api/models"
 	"github.com/labstack/echo-contrib/session"
@@ -25,7 +30,7 @@ func New() (*echo.Echo, *gorm.DB) {
 	gob.Register(time.Time{})
 	e := echo.New()
 
-	db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=announcer sslmode=disable")
+	db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=tu83-announce password= sslmode=disable")
 	e.Logger.Info("Connecting to database...")
 
 	if err != nil {
@@ -33,16 +38,18 @@ func New() (*echo.Echo, *gorm.DB) {
 	}
 
 	e.Logger.Info("Successfully connected to database")
+	db.BlockGlobalUpdate(true)
+
 	// defer db.Close()
 	db.AutoMigrate(&models.User{})
 
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+	e.Use(session.Middleware(newRedisStore()))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://announce.triamudom.ac.th", "https://triam83announce.netlify.com"},
 	}))
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Secure())
@@ -61,4 +68,16 @@ func New() (*echo.Echo, *gorm.DB) {
 	e.GET("/logout", h.Logout)
 
 	return e, db
+}
+
+func newRedisStore() sessions.Store {
+	store, err := redistore.NewRediStore(10, "tcp", ":6379", "", []byte(os.Getenv("REDIS_KEY")))
+
+	if err != nil {
+		panic(err)
+	} else {
+		log.Printf("Successfully connected to redis")
+	}
+
+	return store
 }

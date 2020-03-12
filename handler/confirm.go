@@ -18,7 +18,11 @@ func (handler *Handler) Confirm(c echo.Context) error {
 	handler.DB.Where(&models.User{ID: ID}).First(User)
 
 	if User.Confirmed {
-		return c.JSON(http.StatusUnauthorized, "Already")
+		return c.JSON(http.StatusOK, "Already")
+	}
+
+	if User == (&models.User{}) {
+		return c.JSON(http.StatusUnauthorized, "Unauthorized")
 	}
 
 	handler.DB.Model(User).Update("Confirmed", true)
