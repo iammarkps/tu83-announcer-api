@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/gob"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -18,8 +19,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"net/http"
-
 	"github.com/iammarkps/tu83-announcer-api/handler"
 	"github.com/iammarkps/tu83-announcer-api/models"
 	"github.com/labstack/echo-contrib/session"
@@ -30,15 +29,16 @@ func New() (*echo.Echo, *gorm.DB) {
 	gob.Register(time.Time{})
 	e := echo.New()
 
-	db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=tu83-announce password= sslmode=disable")
+	db, err := gorm.Open("postgres", os.Getenv("DB"))
 	e.Logger.Info("Connecting to database...")
 
 	if err != nil {
-		panic("Failed to connect to database")
+		panic(err)
 	}
 
 	e.Logger.Info("Successfully connected to database")
 	db.BlockGlobalUpdate(true)
+	db.DB().SetMaxIdleConns(100)
 
 	// defer db.Close()
 	db.AutoMigrate(&models.User{})
@@ -53,8 +53,6 @@ func New() (*echo.Echo, *gorm.DB) {
 	}))
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Secure())
-
-	e.Debug = true
 
 	h := &handler.Handler{DB: db}
 

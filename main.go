@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -12,14 +14,28 @@ import (
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	tls := flag.Bool("tls", false, "use tls")
+	flag.Parse()
+
 	e, db := app.New()
 
-	go func() {
-		if err := e.StartTLS(":1323", "cert.pem", "key.pem"); err != nil {
-			e.Logger.Info(err)
-			e.Logger.Fatal("Shutting down HTTP server 🔥🔥🔥")
-		}
-	}()
+	if *tls {
+		go func() {
+			if err := e.StartTLS(":1323", "cert.pem", "key.pem"); err != nil {
+				e.Logger.Info(err)
+				e.Logger.Fatal("Shutting down HTTP server 🔥🔥🔥")
+			}
+		}()
+	} else {
+		go func() {
+			if err := e.Start(":1323"); err != nil {
+				e.Logger.Info(err)
+				e.Logger.Fatal("Shutting down HTTP server 🔥🔥🔥")
+			}
+		}()
+	}
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

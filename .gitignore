@@ -53,3 +53,4 @@ Temporary Items
 # End of https://www.gitignore.io/api/go,macos
 n
 tmp
+main.exe
